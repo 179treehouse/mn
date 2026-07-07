@@ -2932,7 +2932,7 @@ do --// UI Source
                 local Window = {
                     Name = Params.Name or Params.name or "Window",
 
-                    IsOpen = true,
+                    IsOpen = false,
                     Pages = { },
                     Items = { }
                 }
@@ -3144,6 +3144,7 @@ do --// UI Source
 
                     -- Hide the main window title/watermark box
                     Items["Title"].Instance.Visible = false
+                    Items["MainFrame"].Instance.Visible = false
 
                     Window.Items = Items
                 end
