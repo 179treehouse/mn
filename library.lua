@@ -1971,7 +1971,13 @@ do --// UI Source
                     if Bool then
                         local HasContent = false
                         for _, Child in pairs(Items["Content"].Instance:GetChildren()) do
-                            if (Child:IsA("Frame") or Child:IsA("TextLabel") or Child:IsA("TextButton")) and Child.Visible then
+                            if Child:IsA("Frame") then
+                                local TextLabel = Child:FindFirstChildOfClass("TextLabel")
+                                if TextLabel and TextLabel.Text and tostring(TextLabel.Text) ~= "" and TextLabel.TextTransparency < 0.99 then
+                                    HasContent = true
+                                    break
+                                end
+                            elseif Child:IsA("TextLabel") and Child.Text and tostring(Child.Text) ~= "" and Child.TextTransparency < 0.99 then
                                 HasContent = true
                                 break
                             end
