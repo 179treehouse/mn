@@ -1571,6 +1571,9 @@ do --// UI Source
                         if KeybindObject then
                             KeybindObject:SetVis(Value)
                             Update()
+                            if Library.KeyList then
+                                Library.KeyList:SetVisibility(true)
+                            end
                         end
                     end
                 })
@@ -1968,7 +1971,7 @@ do --// UI Source
                     if Bool then
                         local HasContent = false
                         for _, Child in pairs(Items["Content"].Instance:GetChildren()) do
-                            if Child:IsA("Frame") or Child:IsA("TextLabel") or Child:IsA("TextButton") then
+                            if (Child:IsA("Frame") or Child:IsA("TextLabel") or Child:IsA("TextButton")) and Child.Visible then
                                 HasContent = true
                                 break
                             end
