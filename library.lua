@@ -28,7 +28,6 @@ do --// UI Source
     Library = {
         Flags = { },
         MenuKeybind = tostring(Enum.KeyCode.X),
-        MenuOpen = false,
 
         Directory = "Radiance",
         Folders = {
@@ -1571,10 +1570,6 @@ do --// UI Source
                         if KeybindObject then
                             KeybindObject:SetVis(Value)
                             Update()
-                            print("[DEBUG] ShowInKeybindsList toggled, Value=", Value)
-                            if Library.KeyList then
-                                Library.KeyList:SetVisibility(true)
-                            end
                         end
                     end
                 })
@@ -1784,6 +1779,21 @@ do --// UI Source
                 return setmetatable(Watermark, Library)
             end
 
+            Library.UpdateSpecialListVisibility = function()
+                local MenuOpen = false
+                if Library.WindowInstance then
+                    MenuOpen = Library.WindowInstance.IsOpen
+                end
+
+                if Library.KeyList then
+                    Library.KeyList:SetVisibility(MenuOpen or Library.KeyList:HasContent())
+                end
+
+                if Library.StaffViewer then
+                    Library.StaffViewer:SetVisibility(MenuOpen or Library.StaffViewer:HasContent())
+                end
+            end
+
             Library.KeybindList = function(Self, Params)
                 Params = Params or { }
 
@@ -1969,35 +1979,22 @@ do --// UI Source
                 end
 
                 function KeybindList:SetVisibility(Bool)
-                    print("[DEBUG] KeybindList:SetVisibility called, Bool=", Bool, "MenuOpen=", Library.MenuOpen)
-                    if Bool then
-                        local HasContent = false
-                        for _, Child in pairs(Items["Content"].Instance:GetChildren()) do
-                            if Child:IsA("Frame") then
-                                local TextLabel = Child:FindFirstChildOfClass("TextLabel")
-                                if TextLabel and TextLabel.Text and tostring(TextLabel.Text) ~= "" and TextLabel.TextTransparency < 0.99 then
-                                    HasContent = true
-                                    break
-                                end
-                            elseif Child:IsA("TextLabel") and Child.Text and tostring(Child.Text) ~= "" and Child.TextTransparency < 0.99 then
-                                HasContent = true
-                                break
-                            end
-                        end
+                    Items["KeybindList"].Instance.Visible = Bool
+                end
 
-                        print("[DEBUG] KeybindList content scan result, HasContent=", HasContent, "childCount=", #Items["Content"].Instance:GetChildren())
-
-                        if Library.MenuOpen or HasContent then
-                            Items["KeybindList"].Instance.Visible = true
-                            print("[DEBUG] KeybindList -> Visible = true")
-                        else
-                            Items["KeybindList"].Instance.Visible = false
-                            print("[DEBUG] KeybindList -> Visible = false")
-                        end
-                    else
-                        Items["KeybindList"].Instance.Visible = false
-                        print("[DEBUG] KeybindList -> force Visible = false")
+                function KeybindList:HasContent()
+                    local Content = Items["Content"] and Items["Content"].Instance
+                    if not Content then
+                        return false
                     end
+
+                    for _, Child in pairs(Content:GetChildren()) do
+                        if Child:IsA("Frame") and Child.Visible then
+                            return true
+                        end
+                    end
+
+                    return false
                 end
 
                 function KeybindList:Add(Name, Mode)
@@ -2073,38 +2070,20 @@ do --// UI Source
                         StateId = StateId + 1
                         local Current = StateId
 
-                        print("[DEBUG] NewItems:SetStatus called, Bool=", Bool, "CanBeVisible=", CanBeVisible)
-
                         if not CanBeVisible then
                             NewItems["NewKey"].Instance.Visible = false
-                            print("[DEBUG] NewItems:SetStatus -> forced hidden (CanBeVisible=false)")
-                            if Library.KeyList then
-                                Library.KeyList:SetVisibility(true)
-                            end
+                            Library.UpdateSpecialListVisibility()
                             return
                         end
 
                         if Bool then
                             NewItems["NewKey"].Instance.Visible = true
-                            print("[DEBUG] NewItems:SetStatus -> showing item, starting tweens")
 
                             NewItems["NewKey"]:Tween({Size = UDim2.new(0, 180, 0, 15), Position = UDim2.new(0, 0, 0, 0)})
-                            local textTween = NewItems["Text"]:Tween({TextTransparency = 0})
+                            NewItems["Text"]:Tween({TextTransparency = 0})
                             NewItems["Mode"]:Tween({TextTransparency = 0})
 
-                            Library:Thread(function()
-                                if textTween then
-                                    textTween.Completed:Wait()
-                                else
-                                    task.wait(Library.Animation.Time or 0.3)
-                                end
-
-                                print("[DEBUG] NewItems:SetStatus -> show tween complete, Text=", NewItems["Text"].Instance.Text, "TextTransparency=", NewItems["Text"].Instance.TextTransparency)
-
-                                if Library.KeyList then
-                                    Library.KeyList:SetVisibility(true)
-                                end
-                            end)
+                            Library.UpdateSpecialListVisibility()
                         else
                             Library:Thread(function()
                                 NewItems["NewKey"]:Tween({Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(-1, 0, 0, 0)})
@@ -2115,10 +2094,7 @@ do --// UI Source
                                 if Current ~= StateId then return end
 
                                 NewItems["NewKey"].Instance.Visible = false
-                                print("[DEBUG] NewItems:SetStatus -> item fully hidden, Visible=", NewItems["NewKey"].Instance.Visible)
-                                if Library.KeyList then
-                                    Library.KeyList:SetVisibility(true)
-                                end
+                                Library.UpdateSpecialListVisibility()
                             end)
                         end
                     end
@@ -2131,15 +2107,11 @@ do --// UI Source
                         NewItems["Mode"].Instance.Text = Mode
                     end
 
+                    Library.UpdateSpecialListVisibility()
                     return NewItems
                 end
 
                 KeybindList:Center()
-
-                -- set initial visibility according to current menu state or content
-                if Library.KeyList then
-                    Library.KeyList:SetVisibility(true)
-                end
 
                 return setmetatable(KeybindList, Library)
             end
@@ -2327,23 +2299,22 @@ do --// UI Source
                 end
 
                 function StaffList:SetVisibility(Bool)
-                    if Bool then
-                        local HasContent = false
-                        for _, Child in pairs(Items["Content"].Instance:GetChildren()) do
-                            if Child:IsA("Frame") or Child:IsA("TextLabel") or Child:IsA("TextButton") then
-                                HasContent = true
-                                break
-                            end
-                        end
+                    Items["StaffList"].Instance.Visible = Bool
+                end
 
-                        if Library.MenuOpen or HasContent then
-                            Items["StaffList"].Instance.Visible = true
-                        else
-                            Items["StaffList"].Instance.Visible = false
-                        end
-                    else
-                        Items["StaffList"].Instance.Visible = false
+                function StaffList:HasContent()
+                    local Content = Items["Content"] and Items["Content"].Instance
+                    if not Content then
+                        return false
                     end
+
+                    for _, Child in pairs(Content:GetChildren()) do
+                        if Child:IsA("Frame") and Child.Visible then
+                            return true
+                        end
+                    end
+
+                    return false
                 end
 
                 function StaffList:Add(Name, Rank)
@@ -2405,18 +2376,12 @@ do --// UI Source
                         NewItems["Rank"].Instance.Text = Rank
                     end
 
+                    Library.UpdateSpecialListVisibility()
                     return NewItems
                 end
 
-                -- expose the created StaffList instance so Window:SetOpen can manage visibility
-                Library.StaffListWindow = StaffList
-
                 StaffList:Center()
-
-                -- set initial visibility according to current menu state or content
-                if Library.StaffListWindow then
-                    Library.StaffListWindow:SetVisibility(true)
-                end
+                Library.StaffViewer = StaffList
 
                 return setmetatable(StaffList, Library)
             end
@@ -2972,8 +2937,7 @@ do --// UI Source
                     Items = { }
                 }
 
-                -- sync library menu open state with the window's initial state
-                Library.MenuOpen = Window.IsOpen
+                Library.WindowInstance = Window
 
                 local Items = { } do
                     if IsMobile then
@@ -3194,18 +3158,7 @@ do --// UI Source
                     Debounce = true
 
                     Window.IsOpen = Bool
-                    Library.MenuOpen = Bool
-
-                    -- Update global lists visibility: when requesting visibility we pass true
-                    -- so their internal logic will show them if the menu is open or they have content.
-                    if Library.KeyList then
-                        Library.KeyList:SetVisibility(true)
-                    end
-
-                    if Library.StaffListWindow then
-                        Library.StaffListWindow:SetVisibility(true)
-                    end
-
+                    Library.UpdateSpecialListVisibility()
                     Items["MainFrame"]:FadeDescendants(Bool, function()
                         Debounce = false
                     end)
