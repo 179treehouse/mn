@@ -2075,12 +2075,20 @@ do --// UI Source
                             NewItems["NewKey"].Instance.Visible = true
 
                             NewItems["NewKey"]:Tween({Size = UDim2.new(0, 180, 0, 15), Position = UDim2.new(0, 0, 0, 0)})
-                            NewItems["Text"]:Tween({TextTransparency = 0})
+                            local textTween = NewItems["Text"]:Tween({TextTransparency = 0})
                             NewItems["Mode"]:Tween({TextTransparency = 0})
 
-                            if Library.KeyList then
-                                Library.KeyList:SetVisibility(true)
-                            end
+                            Library:Thread(function()
+                                if textTween then
+                                    textTween.Completed:Wait()
+                                else
+                                    task.wait(Library.Animation.Time or 0.3)
+                                end
+
+                                if Library.KeyList then
+                                    Library.KeyList:SetVisibility(true)
+                                end
+                            end)
                         else
                             Library:Thread(function()
                                 NewItems["NewKey"]:Tween({Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(-1, 0, 0, 0)})
@@ -2946,6 +2954,9 @@ do --// UI Source
                     Pages = { },
                     Items = { }
                 }
+
+                -- sync library menu open state with the window's initial state
+                Library.MenuOpen = Window.IsOpen
 
                 local Items = { } do
                     if IsMobile then
