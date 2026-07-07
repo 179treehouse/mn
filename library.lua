@@ -28,6 +28,7 @@ do --// UI Source
     Library = {
         Flags = { },
         MenuKeybind = tostring(Enum.KeyCode.X),
+        MenuOpen = false,
 
         Directory = "Radiance",
         Folders = {
@@ -1964,7 +1965,23 @@ do --// UI Source
                 end
 
                 function KeybindList:SetVisibility(Bool)
-                Items["KeybindList"].Instance.Visible = Bool
+                    if Bool then
+                        local HasContent = false
+                        for _, Child in pairs(Items["Content"].Instance:GetChildren()) do
+                            if Child:IsA("Frame") or Child:IsA("TextLabel") or Child:IsA("TextButton") then
+                                HasContent = true
+                                break
+                            end
+                        end
+
+                        if Library.MenuOpen or HasContent then
+                            Items["KeybindList"].Instance.Visible = true
+                        else
+                            Items["KeybindList"].Instance.Visible = false
+                        end
+                    else
+                        Items["KeybindList"].Instance.Visible = false
+                    end
                 end
 
                 function KeybindList:Add(Name, Mode)
@@ -2264,7 +2281,23 @@ do --// UI Source
                 end
 
                 function StaffList:SetVisibility(Bool)
-                Items["StaffList"].Instance.Visible = Bool
+                    if Bool then
+                        local HasContent = false
+                        for _, Child in pairs(Items["Content"].Instance:GetChildren()) do
+                            if Child:IsA("Frame") or Child:IsA("TextLabel") or Child:IsA("TextButton") then
+                                HasContent = true
+                                break
+                            end
+                        end
+
+                        if Library.MenuOpen or HasContent then
+                            Items["StaffList"].Instance.Visible = true
+                        else
+                            Items["StaffList"].Instance.Visible = false
+                        end
+                    else
+                        Items["StaffList"].Instance.Visible = false
+                    end
                 end
 
                 function StaffList:Add(Name, Rank)
@@ -3104,6 +3137,7 @@ do --// UI Source
                     Debounce = true
 
                     Window.IsOpen = Bool
+                    Library.MenuOpen = Bool
                     Items["MainFrame"]:FadeDescendants(Bool, function()
                         Debounce = false
                     end)
