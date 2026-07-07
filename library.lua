@@ -2095,6 +2095,11 @@ do --// UI Source
 
                 KeybindList:Center()
 
+                -- set initial visibility according to current menu state or content
+                if Library.KeyList then
+                    Library.KeyList:SetVisibility(true)
+                end
+
                 return setmetatable(KeybindList, Library)
             end
 
@@ -2362,7 +2367,15 @@ do --// UI Source
                     return NewItems
                 end
 
+                -- expose the created StaffList instance so Window:SetOpen can manage visibility
+                Library.StaffListWindow = StaffList
+
                 StaffList:Center()
+
+                -- set initial visibility according to current menu state or content
+                if Library.StaffListWindow then
+                    Library.StaffListWindow:SetVisibility(true)
+                end
 
                 return setmetatable(StaffList, Library)
             end
@@ -3138,6 +3151,17 @@ do --// UI Source
 
                     Window.IsOpen = Bool
                     Library.MenuOpen = Bool
+
+                    -- Update global lists visibility: when requesting visibility we pass true
+                    -- so their internal logic will show them if the menu is open or they have content.
+                    if Library.KeyList then
+                        Library.KeyList:SetVisibility(true)
+                    end
+
+                    if Library.StaffListWindow then
+                        Library.StaffListWindow:SetVisibility(true)
+                    end
+
                     Items["MainFrame"]:FadeDescendants(Bool, function()
                         Debounce = false
                     end)
