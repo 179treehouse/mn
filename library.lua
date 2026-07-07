@@ -5129,7 +5129,7 @@ do --// UI Source
                     local ConfigsSection = SettingsPage:Section({Name = "config", Side = 2}) do
                         
                         -- move unload and UI bind into configs section (above config name textbox)
-                        ConfigsSection:Label({Name = "ui bind"}):Keybind({Flag = "uibind", Mode = "Toggle", Default = Enum.KeyCode.RightShift, Callback = function(Value)
+                        ConfigsSection:Label({Name = "menu bind"}):Keybind({Flag = "uibind", Mode = "Toggle", Default = Enum.KeyCode.RightShift, Callback = function(Value)
                             Library.MenuKeybind = Flags["uibind"].Key
                         end})
                         
