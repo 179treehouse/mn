@@ -2071,6 +2071,10 @@ do --// UI Source
                             NewItems["NewKey"]:Tween({Size = UDim2.new(0, 180, 0, 15), Position = UDim2.new(0, 0, 0, 0)})
                             NewItems["Text"]:Tween({TextTransparency = 0})
                             NewItems["Mode"]:Tween({TextTransparency = 0})
+
+                            if Library.KeyList then
+                                Library.KeyList:SetVisibility(true)
+                            end
                         else
                             Library:Thread(function()
                                 NewItems["NewKey"]:Tween({Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(-1, 0, 0, 0)})
@@ -2081,6 +2085,9 @@ do --// UI Source
                                 if Current ~= StateId then return end
 
                                 NewItems["NewKey"].Instance.Visible = false
+                                if Library.KeyList then
+                                    Library.KeyList:SetVisibility(true)
+                                end
                             end)
                         end
                     end
