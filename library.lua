@@ -1571,6 +1571,7 @@ do --// UI Source
                         if KeybindObject then
                             KeybindObject:SetVis(Value)
                             Update()
+                            print("[DEBUG] ShowInKeybindsList toggled, Value=", Value)
                             if Library.KeyList then
                                 Library.KeyList:SetVisibility(true)
                             end
@@ -1968,6 +1969,7 @@ do --// UI Source
                 end
 
                 function KeybindList:SetVisibility(Bool)
+                    print("[DEBUG] KeybindList:SetVisibility called, Bool=", Bool, "MenuOpen=", Library.MenuOpen)
                     if Bool then
                         local HasContent = false
                         for _, Child in pairs(Items["Content"].Instance:GetChildren()) do
@@ -1983,13 +1985,18 @@ do --// UI Source
                             end
                         end
 
+                        print("[DEBUG] KeybindList content scan result, HasContent=", HasContent, "childCount=", #Items["Content"].Instance:GetChildren())
+
                         if Library.MenuOpen or HasContent then
                             Items["KeybindList"].Instance.Visible = true
+                            print("[DEBUG] KeybindList -> Visible = true")
                         else
                             Items["KeybindList"].Instance.Visible = false
+                            print("[DEBUG] KeybindList -> Visible = false")
                         end
                     else
                         Items["KeybindList"].Instance.Visible = false
+                        print("[DEBUG] KeybindList -> force Visible = false")
                     end
                 end
 
@@ -2066,13 +2073,20 @@ do --// UI Source
                         StateId = StateId + 1
                         local Current = StateId
 
+                        print("[DEBUG] NewItems:SetStatus called, Bool=", Bool, "CanBeVisible=", CanBeVisible)
+
                         if not CanBeVisible then
                             NewItems["NewKey"].Instance.Visible = false
+                            print("[DEBUG] NewItems:SetStatus -> forced hidden (CanBeVisible=false)")
+                            if Library.KeyList then
+                                Library.KeyList:SetVisibility(true)
+                            end
                             return
                         end
 
                         if Bool then
                             NewItems["NewKey"].Instance.Visible = true
+                            print("[DEBUG] NewItems:SetStatus -> showing item, starting tweens")
 
                             NewItems["NewKey"]:Tween({Size = UDim2.new(0, 180, 0, 15), Position = UDim2.new(0, 0, 0, 0)})
                             local textTween = NewItems["Text"]:Tween({TextTransparency = 0})
@@ -2084,6 +2098,8 @@ do --// UI Source
                                 else
                                     task.wait(Library.Animation.Time or 0.3)
                                 end
+
+                                print("[DEBUG] NewItems:SetStatus -> show tween complete, Text=", NewItems["Text"].Instance.Text, "TextTransparency=", NewItems["Text"].Instance.TextTransparency)
 
                                 if Library.KeyList then
                                     Library.KeyList:SetVisibility(true)
@@ -2099,6 +2115,7 @@ do --// UI Source
                                 if Current ~= StateId then return end
 
                                 NewItems["NewKey"].Instance.Visible = false
+                                print("[DEBUG] NewItems:SetStatus -> item fully hidden, Visible=", NewItems["NewKey"].Instance.Visible)
                                 if Library.KeyList then
                                     Library.KeyList:SetVisibility(true)
                                 end
